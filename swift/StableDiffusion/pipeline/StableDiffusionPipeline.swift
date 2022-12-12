@@ -67,7 +67,7 @@ public struct StableDiffusionPipeline {
     ///            The images will be nil if safety checks were performed and found the result to be un-safe
    public func generateImages(
 		prompt: String,
-		negativePrompt: String,
+		negativePrompt: String = "",
 		imageCount: Int = 1,
 		stepCount: Int = 50,
 		seed: Int = 0,
