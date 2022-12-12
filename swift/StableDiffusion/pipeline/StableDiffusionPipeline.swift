@@ -82,17 +82,15 @@ public struct StableDiffusionPipeline {
 		//		let blankEmbedding = try textEncoder.encode("")
 		
 		// Concatenate the prompt and negative prompt embeddings
-		let promptEmbeddings = MLShapedArray<Float32>(
+		let concatEmbedding = MLShapedArray<Float32>(
 			concatenating: [negativePromptEmbedding, promptEmbedding],
 			alongAxis: 0
 		)
 		
-		let concatEmbedding = promptEmbeddings
-		
 		let hiddenStates = toHiddenStates(concatEmbedding)
 		
 		/// Setup schedulers
-		let scheduler = (0..<imageCount).map { _ in DPMSolverMultistepScheduler(stepCount: stepCount) }
+		let scheduler = (0..<imageCount).map { _ in Scheduler(stepCount: stepCount) }
 		let stdev = scheduler[0].initNoiseSigma
 		
 		// Generate random latent samples from specified seed
@@ -120,8 +118,6 @@ public struct StableDiffusionPipeline {
 			// Have the scheduler compute the previous (t-1) latent
 			// sample given the predicted noise and current sample
 			for i in 0..<imageCount {
-				print("Step: \(step) t: \(t) i: \(i)")
-				
 				latents[i] = scheduler[i].step(
 					output: noise[i],
 					timeStep: t,
