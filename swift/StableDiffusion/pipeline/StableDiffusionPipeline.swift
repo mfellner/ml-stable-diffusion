@@ -57,10 +57,10 @@ public struct StableDiffusionPipeline {
     ///
     /// - Parameters:
     ///   - prompt: Text prompt to guide sampling
+    ///   - negativePrompt: Negative text prompt to guide sampling
     ///   - stepCount: Number of inference steps to perform
     ///   - imageCount: Number of samples/images to generate for the input prompt
     ///   - seed: Random seed which
-    ///   - guidanceScale: For classifier guidance
     ///   - disableSafety: Safety checks are only performed if `self.canSafetyCheck && !disableSafety`
     ///   - progressHandler: Callback to perform after each step, stops on receiving false response
     /// - Returns: An array of `imageCount` optional images.
@@ -71,12 +71,11 @@ public struct StableDiffusionPipeline {
 		imageCount: Int = 1,
 		stepCount: Int = 50,
 		seed: Int = 0,
-		guidanceScale: Float = 7.5,
 		disableSafety: Bool = false,
 		progressHandler: (Progress) -> Bool = { _ in true }
 	) throws -> [CGImage?] {
 		
-		// Encode the input prompt and negative prompt, as well as a blank unconditioned input
+		// Encode the input prompt and negative prompt
 		let promptEmbedding = try textEncoder.encode(prompt)
 		let negativePromptEmbedding = try textEncoder.encode(negativePrompt)
 		//		let blankEmbedding = try textEncoder.encode("")
@@ -113,7 +112,7 @@ public struct StableDiffusionPipeline {
 				hiddenStates: hiddenStates
 			)
 			
-			noise = performGuidance(noise, guidanceScale: guidanceScale)
+			noise = performGuidance(noise)
 			
 			// Have the scheduler compute the previous (t-1) latent
 			// sample given the predicted noise and current sample
