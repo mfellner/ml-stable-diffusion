@@ -30,6 +30,9 @@ struct StableDiffusionSample: ParsableCommand {
     )
     var resourcePath: String = "./"
 
+    @Option(help: "Negative prompt")
+    var negativePrompt: String = ""
+
     @Option(help: "Number of images to sample / generate")
     var imageCount: Int = 1
 
@@ -85,6 +88,7 @@ struct StableDiffusionSample: ParsableCommand {
 
         let images = try pipeline.generateImages(
             prompt: prompt,
+            negativePrompt: negativePrompt,
             imageCount: imageCount,
             stepCount: stepCount,
             seed: seed,
