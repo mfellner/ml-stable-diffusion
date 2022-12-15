@@ -116,7 +116,7 @@ public struct StableDiffusionPipeline: ResourceManaging {
     ///   - progressHandler: Callback to perform after each step, stops on receiving false response
     /// - Returns: An array of `imageCount` optional images.
     ///            The images will be nil if safety checks were performed and found the result to be un-safe
-   public func generateImages(
+    public func generateImages(
         prompt: String,
         negativePrompt: String = "",
         imageCount: Int = 1,
@@ -126,7 +126,7 @@ public struct StableDiffusionPipeline: ResourceManaging {
         scheduler: StableDiffusionScheduler = .pndmScheduler,
         progressHandler: (Progress) -> Bool = { _ in true }
     ) throws -> [CGImage?] {
-        
+
         // Encode the input prompt and negative prompt
         let promptEmbedding = try textEncoder.encode(prompt)
         let negativePromptEmbedding = try textEncoder.encode(negativePrompt)
@@ -141,9 +141,9 @@ public struct StableDiffusionPipeline: ResourceManaging {
             concatenating: [negativePromptEmbedding, promptEmbedding],
             alongAxis: 0
         )
-        
+
         let hiddenStates = toHiddenStates(concatEmbedding)
-        
+
         /// Setup schedulers
         let scheduler: [Scheduler] = (0..<imageCount).map { _ in
             switch scheduler {
@@ -152,19 +152,19 @@ public struct StableDiffusionPipeline: ResourceManaging {
             }
         }
         let stdev = scheduler[0].initNoiseSigma
-        
+
         // Generate random latent samples from specified seed
         var latents = generateLatentSamples(imageCount, stdev: stdev, seed: seed)
-        
+
         // De-noising loop
         for (step,t) in scheduler[0].timeSteps.enumerated() {
-            
+
             // Expand the latents for classifier-free guidance
             // and input to the Unet noise prediction model
             let latentUnetInput = latents.map {
                 MLShapedArray<Float32>(concatenating: [$0, $0], alongAxis: 0)
             }
-            
+
             // Predict noise residuals from latent samples
             // and current time step conditioned on hidden states
             var noise = try unet.predictNoise(
@@ -172,9 +172,9 @@ public struct StableDiffusionPipeline: ResourceManaging {
                 timeStep: t,
                 hiddenStates: hiddenStates
             )
-            
+
             noise = performGuidance(noise)
-            
+
             // Have the scheduler compute the previous (t-1) latent
             // sample given the predicted noise and current sample
             for i in 0..<imageCount {
@@ -184,7 +184,7 @@ public struct StableDiffusionPipeline: ResourceManaging {
                     sample: latents[i]
                 )
             }
-            
+
             // Report progress
             let progress = Progress(
                 pipeline: self,
