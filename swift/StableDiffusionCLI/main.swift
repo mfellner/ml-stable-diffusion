@@ -19,6 +19,9 @@ struct StableDiffusionSample: ParsableCommand {
     @Argument(help: "Input string prompt")
     var prompt: String
 
+    @Option(help: "Input string negative prompt")
+    var negativePrompt: String
+
     @Option(
         help: ArgumentHelp(
             "Path to stable diffusion resources.",
@@ -51,7 +54,7 @@ struct StableDiffusionSample: ParsableCommand {
     var outputPath: String = "./"
 
     @Option(help: "Random seed")
-    var seed: Int = 93
+    var seed: UInt32 = 93
 
     @Option(help: "Compute units to load model with {all,cpuOnly,cpuAndGPU,cpuAndNeuralEngine}")
     var computeUnits: ComputeUnits = .all
